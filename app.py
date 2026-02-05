@@ -1,5 +1,5 @@
 import random
-import os
+import streamlit as st
 
 # Base de datos de preguntas
 preguntas = [
