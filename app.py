@@ -102,8 +102,8 @@ PREGUNTAS = [
 ]
 
 # ---------------- FUNCIONES ----------------
-def guardar(nombre, puntaje, calificacion):
-    nuevo = pd.DataFrame([{
+def guardar_resultado(nombre, puntaje, calificacion):
+    fila = pd.DataFrame([{
         "Nombre": nombre,
         "Puntaje": puntaje,
         "Calificación": calificacion
@@ -111,28 +111,21 @@ def guardar(nombre, puntaje, calificacion):
 
     if os.path.exists(ARCHIVO):
         df = pd.read_csv(ARCHIVO)
-        df = pd.concat([df, nuevo], ignore_index=True)
+        df = pd.concat([df, fila], ignore_index=True)
     else:
-        df = nuevo
+        df = fila
 
     df.to_csv(ARCHIVO, index=False)
 
-def reiniciar():
-    st.session_state.clear()
+def reiniciar_juego():
+    for key in ["pantalla", "preguntas", "indice", "puntaje", "nombre"]:
+        if key in st.session_state:
+            del st.session_state[key]
     st.rerun()
 
 # ---------------- ESTADO ----------------
 if "pantalla" not in st.session_state:
     st.session_state.pantalla = "inicio"
-
-if "preguntas" not in st.session_state:
-    st.session_state.preguntas = random.sample(PREGUNTAS, 4)
-
-if "indice" not in st.session_state:
-    st.session_state.indice = 0
-
-if "puntaje" not in st.session_state:
-    st.session_state.puntaje = 0
 
 # ---------------- INICIO ----------------
 if st.session_state.pantalla == "inicio":
@@ -141,28 +134,27 @@ if st.session_state.pantalla == "inicio":
 
     st.subheader("📋 Instrucciones")
     st.write("""
-    • Ingresa tu nombre para comenzar  
-    • Responde **4 preguntas aleatorias**  
-    • Cada pregunta tiene opciones **A, B y C**  
-    • Cada respuesta correcta vale **1 punto**  
-    • Al final recibirás una **calificación sobre 10**  
-    • Tu resultado quedará guardado
+    • Ingresa tu nombre  
+    • Responde 4 preguntas aleatorias  
+    • Opciones A, B y C  
+    • Cada acierto vale 1 punto  
+    • Calificación final sobre 10  
+    • Los resultados quedan guardados
     """)
 
-    nombre = st.text_input("Escribe tu nombre")
-
-    listo = st.radio(
-        "¿Estás listo para jugar?",
-        ["Sí", "No"]
-    )
+    nombre = st.text_input("Nombre del jugador")
+    listo = st.radio("¿Estás listo para jugar?", ["Sí", "No"])
 
     if st.button("Comenzar"):
         if nombre.strip() == "":
             st.warning("Debes ingresar tu nombre")
         elif listo == "No":
-            st.info("Cuando estés listo selecciona **Sí** 😎")
+            st.info("Selecciona **Sí** cuando estés listo 😎")
         else:
             st.session_state.nombre = nombre
+            st.session_state.preguntas = random.sample(PREGUNTAS, 4)
+            st.session_state.indice = 0
+            st.session_state.puntaje = 0
             st.session_state.pantalla = "juego"
             st.rerun()
 
@@ -172,15 +164,23 @@ elif st.session_state.pantalla == "juego":
     if st.session_state.indice >= len(st.session_state.preguntas):
 
         calificacion = (st.session_state.puntaje / len(st.session_state.preguntas)) * 10
-        guardar(st.session_state.nombre, st.session_state.puntaje, round(calificacion, 1))
+        guardar_resultado(
+            st.session_state.nombre,
+            st.session_state.puntaje,
+            round(calificacion, 1)
+        )
 
         st.title("🏁 Resultado Final")
         st.write(f"👤 **Nombre:** {st.session_state.nombre}")
         st.write(f"📊 **Puntaje:** {st.session_state.puntaje}")
         st.write(f"🏆 **Calificación:** {calificacion:.1f} / 10")
 
+        if os.path.exists(ARCHIVO):
+            st.subheader("📁 Resultados guardados")
+            st.dataframe(pd.read_csv(ARCHIVO))
+
         if st.button("Reiniciar juego"):
-            reiniciar()
+            reiniciar_juego()
 
     else:
         p = st.session_state.preguntas[st.session_state.indice]
@@ -191,7 +191,7 @@ elif st.session_state.pantalla == "juego":
         respuesta = st.radio(
             "Selecciona una opción:",
             ["A", "B", "C"],
-            key=f"preg_{st.session_state.indice}",
+            key=f"resp_{st.session_state.indice}",
             format_func=lambda x: f"{x}) {p['opciones'][x]}"
         )
 
@@ -204,5 +204,3 @@ elif st.session_state.pantalla == "juego":
 
             st.session_state.indice += 1
             st.rerun()
-
-
