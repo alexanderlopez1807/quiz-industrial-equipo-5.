@@ -153,8 +153,7 @@ elif st.session_state.pantalla == "juego":
 
         if st.session_state.indice == 4:
             st.session_state.pantalla = "resultado"
-
-       st.rerun()
+            st.rerun()
 
 # -----------------------------
 # Pantalla de resultados
