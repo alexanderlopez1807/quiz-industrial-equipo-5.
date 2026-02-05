@@ -139,6 +139,16 @@ if st.session_state.pantalla == "inicio":
 
     st.title("🎮 Quiz de Ingeniería Industrial")
 
+    st.subheader("📋 Instrucciones")
+    st.write("""
+    • Ingresa tu nombre para comenzar  
+    • Responde **4 preguntas aleatorias**  
+    • Cada pregunta tiene opciones **A, B y C**  
+    • Cada respuesta correcta vale **1 punto**  
+    • Al final recibirás una **calificación sobre 10**  
+    • Tu resultado quedará guardado
+    """)
+
     nombre = st.text_input("Escribe tu nombre")
 
     listo = st.radio(
@@ -150,7 +160,7 @@ if st.session_state.pantalla == "inicio":
         if nombre.strip() == "":
             st.warning("Debes ingresar tu nombre")
         elif listo == "No":
-            st.info("Cuando estés listo, selecciona Sí 😎")
+            st.info("Cuando estés listo selecciona **Sí** 😎")
         else:
             st.session_state.nombre = nombre
             st.session_state.pantalla = "juego"
@@ -165,9 +175,9 @@ elif st.session_state.pantalla == "juego":
         guardar(st.session_state.nombre, st.session_state.puntaje, round(calificacion, 1))
 
         st.title("🏁 Resultado Final")
-        st.write(f"**Nombre:** {st.session_state.nombre}")
-        st.write(f"**Puntaje:** {st.session_state.puntaje}")
-        st.write(f"**Calificación:** {calificacion:.1f} / 10")
+        st.write(f"👤 **Nombre:** {st.session_state.nombre}")
+        st.write(f"📊 **Puntaje:** {st.session_state.puntaje}")
+        st.write(f"🏆 **Calificación:** {calificacion:.1f} / 10")
 
         if st.button("Reiniciar juego"):
             reiniciar()
@@ -194,4 +204,5 @@ elif st.session_state.pantalla == "juego":
 
             st.session_state.indice += 1
             st.rerun()
+
 
