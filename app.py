@@ -166,5 +166,6 @@ elif st.session_state.pantalla == "resultado":
 
     if st.button("Jugar otra vez"):
         st.session_state.pantalla = "inicio"
-       st.rerun()
+        st.rerun()
+       
 
