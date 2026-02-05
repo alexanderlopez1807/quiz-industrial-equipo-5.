@@ -1,7 +1,9 @@
-import random
 import streamlit as st
+import random
 
+# -----------------------------
 # Base de datos de preguntas
+# -----------------------------
 preguntas = [
     {
         "pregunta": "¿Qué herramienta se utiliza para identificar desperdicios dentro de un proceso?",
@@ -52,7 +54,7 @@ preguntas = [
         "pregunta": "¿Qué evidencia indica que el control del proceso aún es frágil?",
         "opciones": {
             "A": "Los resultados se mantienen estables únicamente mediante intervención constante",
-            "B": "Los resultados presentan variaciones menores",
+            "B": "Los resultados presentan variaciones menores entre periodos",
             "C": "Los resultados cumplen los objetivos establecidos de forma regular"
         },
         "respuesta": "A"
@@ -76,87 +78,93 @@ preguntas = [
         "respuesta": "B"
     },
     {
-        "pregunta": "¿Cuál de las siguientes acciones contribuye más a reducir los tiempos de ciclo?",
+        "pregunta": "¿Cuál de las siguientes acciones contribuye más a reducir los tiempos de ciclo en una línea de producción?",
         "opciones": {
-            "A": "Incrementar el número de operarios",
-            "B": "Balancear las operaciones entre estaciones",
-            "C": "Optimizar el ritmo individual"
+            "A": "Incrementar el número de operarios en la línea",
+            "B": "Balancear las operaciones entre las estaciones de trabajo",
+            "C": "Optimizar el ritmo de trabajo individual"
         },
         "respuesta": "B"
     },
     {
         "pregunta": "¿Qué beneficio aporta un flujo de procesos bien definido?",
         "opciones": {
-            "A": "Permite asignar responsabilidades generales",
-            "B": "Reduce la intervención correctiva frecuente",
-            "C": "Facilita identificar actividades innecesarias"
+            "A": "Permite asignar responsabilidades de forma general",
+            "B": "Reduce la necesidad de intervención correctiva frecuente",
+            "C": "Facilita la identificación de actividades innecesarias o repetidas"
         },
         "respuesta": "C"
     }
 ]
 
-def limpiar_pantalla():
-    os.system('cls' if os.name == 'nt' else 'clear')
+# -----------------------------
+# Estado inicial
+# -----------------------------
+if "pantalla" not in st.session_state:
+    st.session_state.pantalla = "inicio"
+    st.session_state.preguntas_juego = []
+    st.session_state.indice = 0
+    st.session_state.puntos = 0
 
-def pantalla_inicio():
-    limpiar_pantalla()
-    print("===================================================")
-    print("JUEGO DE PREGUNTAS SOBRE PROCESOS Y MEJORA CONTINUA")
-    print("Ingeniería Industrial")
-    print("===================================================\n")
-    print("Reglas:")
-    print("- 4 preguntas aleatorias")
-    print("- 1 punto por respuesta correcta")
-    print("- Solo responder A,B o C en las preguntas")
+st.title("🎮 Juego de Mejora Continua")
+st.write("Ingeniería Industrial")
 
-    while True:
-        listo = input("¿Estás listo para jugar? (si / no): ").strip().lower()
-        if listo in ["si", "no"]:
-            return listo == "si"
-        else:
-            print(" Por favor escribe 'si' o 'no'.")
+# -----------------------------
+# Pantalla de inicio
+# -----------------------------
+if st.session_state.pantalla == "inicio":
+    st.subheader("Reglas del juego")
+    st.write("- 4 preguntas aleatorias")
+    st.write("- Cada pregunta tiene opciones A, B y C")
+    st.write("- 1 punto por respuesta correcta")
 
-def jugar():
-    puntos = 0
-    preguntas_seleccionadas = random.sample(preguntas, 4)
+    if st.button("Estoy listo para jugar"):
+        st.session_state.preguntas_juego = random.sample(preguntas, 4)
+        st.session_state.indice = 0
+        st.session_state.puntos = 0
+        st.session_state.pantalla = "juego"
+        st.experimental_rerun()
 
-    for i, p in enumerate(preguntas_seleccionadas, 1):
-        print(f"\nPregunta {i}: {p['pregunta']}")
-        for clave, opcion in p["opciones"].items():
-            print(f"{clave}) {opcion}")
+# -----------------------------
+# Pantalla del juego
+# -----------------------------
+elif st.session_state.pantalla == "juego":
+    p = st.session_state.preguntas_juego[st.session_state.indice]
 
-        respuesta = input("Tu respuesta (A, B o C): ").upper()
+    st.subheader(f"Pregunta {st.session_state.indice + 1} de 4")
 
-        if respuesta == p["respuesta"]:
-            print("✅ Correcto")
-            puntos += 1
-        else:
-            print(f"❌ Incorrecto. Respuesta correcta: {p['respuesta']}")
+    opciones_mostradas = [
+        f"{letra}) {texto}" for letra, texto in p["opciones"].items()
+    ]
 
-    calificacion = (puntos / 4) * 10
+    seleccion = st.radio(
+        p["pregunta"],
+        opciones_mostradas,
+        key=f"pregunta_{st.session_state.indice}"
+    )
 
-    print("\n RESULTADOS FINALES")
-    print(f"Puntos obtenidos: {puntos}/4")
-    print(f"Calificación final: {calificacion:.1f}/10")
+    if st.button("Responder"):
+        letra_elegida = seleccion[0]  # A, B o C
 
-def main():
-    while True:
-        if not pantalla_inicio():
-            print("\n Juego cancelado")
-            break
+        if letra_elegida == p["respuesta"]:
+            st.session_state.puntos += 1
 
-        jugar()
+        st.session_state.indice += 1
 
-        while True:
-            repetir = input("\n¿Deseas jugar otra vez? (si / no): ").strip().lower()
-            if repetir in ["si", "no"]:
-                break
-            else:
-                print(" Escribe 'si' o 'no'.")
+        if st.session_state.indice == 4:
+            st.session_state.pantalla = "resultado"
 
-        if repetir != "si":
-            print(" Gracias por jugar")
-            break
+        st.experimental_rerun()
 
-main()
+# -----------------------------
+# Pantalla de resultados
+# -----------------------------
+elif st.session_state.pantalla == "resultado":
+    calificacion = (st.session_state.puntos / 4) * 10
 
+    st.success(f"Puntos obtenidos: {st.session_state.puntos} / 4")
+    st.success(f"Calificación final: {calificacion:.1f} / 10")
+
+    if st.button("Jugar otra vez"):
+        st.session_state.pantalla = "inicio"
+        st.experimental_rerun()
