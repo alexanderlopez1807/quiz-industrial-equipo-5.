@@ -106,7 +106,7 @@ if "pantalla" not in st.session_state:
     st.session_state.indice = 0
     st.session_state.puntos = 0
 
-st.title("preguntas sobre Procesos y Mejora Continua")
+st.title("Preguntas sobre Procesos y Mejora Continua")
 st.write("Ingeniería Industrial")
 
 # -----------------------------
