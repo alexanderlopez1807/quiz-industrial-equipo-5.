@@ -3,7 +3,7 @@ import random
 import pandas as pd
 import os
 
-st.set_page_config(page_title="Quiz Ingeniería Industrial", layout="centered")
+st.set_page_config(page_title="Quiz de Procesos y Mejora Continua", layout="centered")
 
 ARCHIVO = "resultados.csv"
 
@@ -130,15 +130,14 @@ if "pantalla" not in st.session_state:
 # ---------------- INICIO ----------------
 if st.session_state.pantalla == "inicio":
 
-    st.title("🎮 Quiz de Ingeniería Industrial")
+    st.title("Quiz de Procesos y Mejora Continua")
 
-    st.subheader("📋 Instrucciones")
+    st.subheader(" Instrucciones")
     st.write("""
     • Ingresa tu nombre  
     • Responde 4 preguntas aleatorias  
     • Opciones A, B y C  
-    • Cada acierto vale 1 punto  
-    • Calificación final sobre 10  
+    • Cada acierto vale 1 punto   
     • Los resultados quedan guardados
     """)
 
@@ -170,13 +169,13 @@ elif st.session_state.pantalla == "juego":
             round(calificacion, 1)
         )
 
-        st.title("🏁 Resultado Final")
-        st.write(f"👤 **Nombre:** {st.session_state.nombre}")
-        st.write(f"📊 **Puntaje:** {st.session_state.puntaje}")
-        st.write(f"🏆 **Calificación:** {calificacion:.1f} / 10")
+        st.title("Resultado Final")
+        st.write(f" **Nombre:** {st.session_state.nombre}")
+        st.write(f" **Puntaje:** {st.session_state.puntaje}")
+        st.write(f" **Calificación:** {calificacion:.1f} / 10")
 
         if os.path.exists(ARCHIVO):
-            st.subheader("📁 Resultados guardados")
+            st.subheader(" Resultados guardados")
             st.dataframe(pd.read_csv(ARCHIVO))
 
         if st.button("Reiniciar juego"):
