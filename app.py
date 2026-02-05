@@ -3,7 +3,7 @@ import random
 import pandas as pd
 import os
 
-st.set_page_config(page_title="Quiz de Procesos y Mejora Continua")
+st.set_page_config(page_title="Quiz Ingeniería Industrial", layout="centered")
 
 ARCHIVO_RESULTADOS = "resultados.csv"
 
@@ -117,28 +117,33 @@ def guardar_resultado(nombre, puntaje, calificacion):
 
     df.to_csv(ARCHIVO_RESULTADOS, index=False)
 
-def reiniciar():
+def reiniciar_juego():
     st.session_state.clear()
     st.rerun()
 
-# ---------------- SESSION ----------------
+# ---------------- SESSION STATE ----------------
 if "pantalla" not in st.session_state:
     st.session_state.pantalla = "inicio"
-    st.session_state.preguntas = random.sample(PREGUNTAS_BASE, 4)
-    st.session_state.indice = 0
-    st.session_state.puntaje = 0
-    st.session_state.nombre = ""
 
-# ---------------- INICIO ----------------
+if "preguntas" not in st.session_state:
+    st.session_state.preguntas = random.sample(PREGUNTAS_BASE, 4)
+
+if "indice" not in st.session_state:
+    st.session_state.indice = 0
+
+if "puntaje" not in st.session_state:
+    st.session_state.puntaje = 0
+
+# ---------------- PANTALLA INICIO ----------------
 if st.session_state.pantalla == "inicio":
 
-    st.title("Quiz de Procesos y Mejora Continua")
+    st.title("🎮 Quiz – Ingeniería Industrial")
 
     nombre = st.text_input("Ingresa tu nombre:")
 
     if st.button("Estoy listo para jugar"):
         if nombre.strip() == "":
-            st.warning("Ingresa tu nombre")
+            st.warning("Debes ingresar tu nombre")
         else:
             st.session_state.nombre = nombre
             st.session_state.pantalla = "juego"
@@ -150,37 +155,39 @@ elif st.session_state.pantalla == "juego":
     if st.session_state.indice >= 4:
 
         calificacion = (st.session_state.puntaje / 4) * 10
-        guardar_resultado(st.session_state.nombre, st.session_state.puntaje, calificacion)
+        guardar_resultado(st.session_state.nombre,
+                          st.session_state.puntaje,
+                          round(calificacion,1))
 
         st.title("Resultado Final")
         st.write(f"Nombre: {st.session_state.nombre}")
         st.write(f"Puntaje: {st.session_state.puntaje}/4")
-        st.write(f"Calificación: {calificacion:.1f}")
+        st.write(f"Calificación: {calificacion:.1f}/10")
 
-        if st.button("Volver al inicio"):
-            reiniciar()
+        if st.button("Reiniciar juego"):
+            reiniciar_juego()
 
     else:
 
-        pregunta_actual = st.session_state.preguntas[st.session_state.indice]
+        pregunta = st.session_state.preguntas[st.session_state.indice]
 
         st.subheader(f"Pregunta {st.session_state.indice + 1}")
-        st.write(pregunta_actual["pregunta"])
+        st.write(pregunta["pregunta"])
 
         respuesta = st.radio(
             "Selecciona:",
-            ["A", "B", "C"],
-            key=f"pregunta_{st.session_state.indice}",  #  ESTA ES LA SOLUCIÓN
-            format_func=lambda x: f"{x}) {pregunta_actual['opciones'][x]}"
+            ["A","B","C"],
+            key=f"pregunta_{st.session_state.indice}",   # ⭐ ESTA ES LA SOLUCIÓN
+            format_func=lambda x: f"{x}) {pregunta['opciones'][x]}"
         )
 
         if st.button("Responder"):
 
-            if respuesta == pregunta_actual["correcta"]:
+            if respuesta == pregunta["correcta"]:
                 st.success("Correcto")
                 st.session_state.puntaje += 1
             else:
-                st.error(f"Incorrecto. Respuesta correcta: {pregunta_actual['correcta']}")
+                st.error(f"Incorrecto. Respuesta correcta: {pregunta['correcta']}")
 
             st.session_state.indice += 1
             st.rerun()
