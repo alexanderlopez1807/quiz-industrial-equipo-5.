@@ -123,7 +123,7 @@ if st.session_state.pantalla == "inicio":
         st.session_state.indice = 0
         st.session_state.puntos = 0
         st.session_state.pantalla = "juego"
-        st.experimental_rerun()
+        st.rerun()
 
 # -----------------------------
 # Pantalla del juego
@@ -154,7 +154,7 @@ elif st.session_state.pantalla == "juego":
         if st.session_state.indice == 4:
             st.session_state.pantalla = "resultado"
 
-        st.experimental_rerun()
+       st.rerun()
 
 # -----------------------------
 # Pantalla de resultados
@@ -167,4 +167,5 @@ elif st.session_state.pantalla == "resultado":
 
     if st.button("Jugar otra vez"):
         st.session_state.pantalla = "inicio"
-        st.experimental_rerun()
+       st.rerun()
+
