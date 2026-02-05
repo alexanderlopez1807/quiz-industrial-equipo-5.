@@ -5,10 +5,10 @@ import os
 
 st.set_page_config(page_title="Quiz Ingeniería Industrial", layout="centered")
 
-ARCHIVO_RESULTADOS = "resultados.csv"
+ARCHIVO = "resultados.csv"
 
 # ---------------- PREGUNTAS ----------------
-PREGUNTAS_BASE = [
+PREGUNTAS = [
     {
         "pregunta": "¿Qué herramienta se utiliza para identificar desperdicios dentro de un proceso?",
         "opciones": {
@@ -82,51 +82,51 @@ PREGUNTAS_BASE = [
         "correcta": "B"
     },
     {
-        "pregunta": "¿Cuál de las siguientes acciones contribuye más a reducir los tiempos de ciclo en una línea de producción?",
+        "pregunta": "¿Cuál acción reduce más los tiempos de ciclo en una línea de producción?",
         "opciones": {
-            "A": "Incrementar el número de operarios en la línea",
-            "B": "Balancear las operaciones entre las estaciones de trabajo",
-            "C": "Optimizar el ritmo de trabajo individual"
+            "A": "Incrementar el número de operarios",
+            "B": "Balancear las operaciones entre estaciones",
+            "C": "Optimizar el ritmo individual"
         },
         "correcta": "B"
     },
     {
         "pregunta": "¿Qué beneficio aporta un flujo de procesos bien definido?",
         "opciones": {
-            "A": "Permite asignar responsabilidades de forma general",
-            "B": "Reduce la necesidad de intervención correctiva frecuente",
-            "C": "Facilita la identificación de actividades innecesarias o repetidas"
+            "A": "Asignar responsabilidades generales",
+            "B": "Reducir intervención correctiva frecuente",
+            "C": "Identificar actividades innecesarias o repetidas"
         },
         "correcta": "C"
     }
 ]
 
 # ---------------- FUNCIONES ----------------
-def guardar_resultado(nombre, puntaje, calificacion):
+def guardar(nombre, puntaje, calificacion):
     nuevo = pd.DataFrame([{
         "Nombre": nombre,
         "Puntaje": puntaje,
         "Calificación": calificacion
     }])
 
-    if os.path.exists(ARCHIVO_RESULTADOS):
-        df = pd.read_csv(ARCHIVO_RESULTADOS)
+    if os.path.exists(ARCHIVO):
+        df = pd.read_csv(ARCHIVO)
         df = pd.concat([df, nuevo], ignore_index=True)
     else:
         df = nuevo
 
-    df.to_csv(ARCHIVO_RESULTADOS, index=False)
+    df.to_csv(ARCHIVO, index=False)
 
-def reiniciar_juego():
+def reiniciar():
     st.session_state.clear()
     st.rerun()
 
-# ---------------- SESSION STATE ----------------
+# ---------------- ESTADO ----------------
 if "pantalla" not in st.session_state:
     st.session_state.pantalla = "inicio"
 
 if "preguntas" not in st.session_state:
-    st.session_state.preguntas = random.sample(PREGUNTAS_BASE, 4)
+    st.session_state.preguntas = random.sample(PREGUNTAS, 4)
 
 if "indice" not in st.session_state:
     st.session_state.indice = 0
@@ -134,16 +134,23 @@ if "indice" not in st.session_state:
 if "puntaje" not in st.session_state:
     st.session_state.puntaje = 0
 
-# ---------------- PANTALLA INICIO ----------------
+# ---------------- INICIO ----------------
 if st.session_state.pantalla == "inicio":
 
-    st.title("🎮 Quiz – Ingeniería Industrial")
+    st.title("🎮 Quiz de Ingeniería Industrial")
 
-    nombre = st.text_input("Ingresa tu nombre:")
+    nombre = st.text_input("Escribe tu nombre")
 
-    if st.button("Estoy listo para jugar"):
+    listo = st.radio(
+        "¿Estás listo para jugar?",
+        ["Sí", "No"]
+    )
+
+    if st.button("Comenzar"):
         if nombre.strip() == "":
             st.warning("Debes ingresar tu nombre")
+        elif listo == "No":
+            st.info("Cuando estés listo, selecciona Sí 😎")
         else:
             st.session_state.nombre = nombre
             st.session_state.pantalla = "juego"
@@ -152,42 +159,38 @@ if st.session_state.pantalla == "inicio":
 # ---------------- JUEGO ----------------
 elif st.session_state.pantalla == "juego":
 
-    if st.session_state.indice >= 4:
+    if st.session_state.indice >= len(st.session_state.preguntas):
 
-        calificacion = (st.session_state.puntaje / 4) * 10
-        guardar_resultado(st.session_state.nombre,
-                          st.session_state.puntaje,
-                          round(calificacion,1))
+        calificacion = (st.session_state.puntaje / len(st.session_state.preguntas)) * 10
+        guardar(st.session_state.nombre, st.session_state.puntaje, round(calificacion, 1))
 
-        st.title("Resultado Final")
-        st.write(f"Nombre: {st.session_state.nombre}")
-        st.write(f"Puntaje: {st.session_state.puntaje}/4")
-        st.write(f"Calificación: {calificacion:.1f}/10")
+        st.title("🏁 Resultado Final")
+        st.write(f"**Nombre:** {st.session_state.nombre}")
+        st.write(f"**Puntaje:** {st.session_state.puntaje}")
+        st.write(f"**Calificación:** {calificacion:.1f} / 10")
 
         if st.button("Reiniciar juego"):
-            reiniciar_juego()
+            reiniciar()
 
     else:
-
-        pregunta = st.session_state.preguntas[st.session_state.indice]
+        p = st.session_state.preguntas[st.session_state.indice]
 
         st.subheader(f"Pregunta {st.session_state.indice + 1}")
-        st.write(pregunta["pregunta"])
+        st.write(p["pregunta"])
 
         respuesta = st.radio(
-            "Selecciona:",
-            ["A","B","C"],
-            key=f"pregunta_{st.session_state.indice}",   # ⭐ ESTA ES LA SOLUCIÓN
-            format_func=lambda x: f"{x}) {pregunta['opciones'][x]}"
+            "Selecciona una opción:",
+            ["A", "B", "C"],
+            key=f"preg_{st.session_state.indice}",
+            format_func=lambda x: f"{x}) {p['opciones'][x]}"
         )
 
         if st.button("Responder"):
-
-            if respuesta == pregunta["correcta"]:
-                st.success("Correcto")
+            if respuesta == p["correcta"]:
+                st.success("Correcto ✅")
                 st.session_state.puntaje += 1
             else:
-                st.error(f"Incorrecto. Respuesta correcta: {pregunta['correcta']}")
+                st.error(f"Incorrecto ❌ Respuesta correcta: {p['correcta']}")
 
             st.session_state.indice += 1
             st.rerun()
