@@ -110,7 +110,7 @@ if "inicio" not in st.session_state:
 
 # ---------------- PANTALLA DE INICIO ----------------
 if not st.session_state.inicio:
-    st.title("Quiz de precesos y mejora continua")
+    st.title("Quiz de procesos y mejora continua")
 
     st.subheader("Reglas del juego")
     st.write("• 4 preguntas aleatorias")
